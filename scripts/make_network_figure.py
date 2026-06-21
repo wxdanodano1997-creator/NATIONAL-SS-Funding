@@ -193,7 +193,10 @@ def make_figure(name, edge_csv, block, out_png, latin):
     wdeg = dict(G.degree(weight="weight"))
     nodes = list(G.nodes())
     vals = np.array([wdeg[n] for n in nodes])
-    norm = (vals - vals.min()) / (vals.max() - vals.min() + 1e-9)
+    # 用1%分位作为下限, 避免个别孤立低度节点把整体字号放大(跨图保持一致标准)
+    vlo = np.percentile(vals, 1)
+    vhi = vals.max()
+    norm = np.clip((vals - vlo) / (vhi - vlo + 1e-9), 0.0, 1.0)
     nrm = dict(zip(nodes, norm))
 
     pos = community_aware_layout(G, comm)
