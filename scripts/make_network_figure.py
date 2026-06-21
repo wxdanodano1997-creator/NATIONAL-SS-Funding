@@ -111,11 +111,12 @@ def load_graph(fn):
 
 
 def academic_palette(n):
+    # 浅色(白底)学术配色: 较深、饱和适中, 在白背景上清晰可读
     base = [
-        "#4C9CD6", "#E8A33D", "#5CB37F", "#D9685F", "#9B82C4",
-        "#C7895B", "#E07FB0", "#8DB04A", "#4FC4C4", "#C5B23C",
-        "#7C97C9", "#D2706E", "#6FB59A", "#B57FB0", "#A0A36B",
-        "#5BA0B5", "#CC8A4A", "#8FA8D0", "#D49AA0", "#74C08D",
+        "#1F6FB2", "#C8741A", "#2E8B57", "#C0392B", "#6A4CA5",
+        "#8A5A2B", "#C2407F", "#5A8A1F", "#178A8A", "#9A7D14",
+        "#3B5B9A", "#A83A3A", "#2F8A6A", "#7A4A8A", "#6E6E2A",
+        "#2A7A9A", "#A85A1A", "#4A6AA8", "#A8527A", "#3A8A4A",
     ]
     while len(base) < n:
         base += base
@@ -200,7 +201,7 @@ def make_figure(name, edge_csv, block, out_png, latin):
     ys = [p[1] for p in pos.values()]
     coord_span = max(max(xs) - min(xs), max(ys) - min(ys))
 
-    FMIN, FMAX = 3.8, 40.0
+    FMIN, FMAX = 4.8, 53.0
     fsizes = {n: FMIN + (FMAX - FMIN) * (nrm[n] ** 0.62) for n in nodes}
     pos = resolve_overlaps(pos, fsizes, latin, coord_span)
 
@@ -213,17 +214,17 @@ def make_figure(name, edge_csv, block, out_png, latin):
         m["modularity"] = nx.community.modularity(
             G, list(groups.values()), weight="weight")
 
-    # ---- draw ----
+    # ---- draw (白底学术风格) ----
     fig, ax = plt.subplots(figsize=(FIGIN, FIGIN), dpi=DPI)
-    BG = "#0b0e14"
+    BG = "#ffffff"
     fig.patch.set_facecolor(BG)
     ax.set_facecolor(BG)
     ax.axis("off")
 
     ew = np.array([d["weight"] for _, _, d in G.edges(data=True)])
     ewn = ew / ew.max()
-    nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#9fb3c8",
-                           width=0.12 + 0.5 * ewn, alpha=0.045)
+    nx.draw_networkx_edges(G, pos, ax=ax, edge_color="#5b6672",
+                           width=0.12 + 0.5 * ewn, alpha=0.05)
 
     fp_cache = {}
 
@@ -239,8 +240,8 @@ def make_figure(name, edge_csv, block, out_png, latin):
         x, y = pos[n]
         sz = fsizes[n]
         c = to_rgba(pal[comm[n]])
-        weight = "bold" if sz > 14 else "normal"
-        alpha = 0.95 if sz > 9 else (0.78 if sz > 6 else 0.6)
+        weight = "bold" if sz > 18 else "normal"
+        alpha = 1.0 if sz > 12 else (0.9 if sz > 8 else 0.8)
         ax.text(x, y, n, fontproperties=fprop(sz), color=c,
                 ha="center", va="center", alpha=alpha,
                 fontweight=weight, zorder=3)
@@ -252,9 +253,9 @@ def make_figure(name, edge_csv, block, out_png, latin):
            f"mean degree = {m.get('avgdeg', float('nan')):.1f}")
     ax.text(0.012, 0.985, cap, transform=ax.transAxes,
             fontproperties=fm.FontProperties(fname=CJK_FONT, size=20),
-            color="#c7d3e0", va="top", ha="left", linespacing=1.5,
-            bbox=dict(boxstyle="round,pad=0.6", fc="#10151f",
-                      ec="#2a3344", alpha=0.7))
+            color="#33393f", va="top", ha="left", linespacing=1.5,
+            bbox=dict(boxstyle="round,pad=0.6", fc="#f4f6f8",
+                      ec="#b8c0c8", alpha=0.92))
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     fig.savefig(out_png, facecolor=BG, dpi=DPI, bbox_inches="tight",
