@@ -159,22 +159,31 @@ def main():
         print(f"  锚点[{idx}] = {paras[idx].text.strip()[:30]}  插入{len(figs)}张")
 
     n_fig = 0
+    # 图片占满正文栏宽 (页面宽 - 左右页边距)
+    sec = d.sections[0]
+    usable_w = sec.page_width - sec.left_margin - sec.right_margin
     for idx, figs in plan:
         anchor = paras[idx]
         for img, tag, title in figs:
-            # 图片段落
+            # 图片段落 (居中, 无首行缩进)
             pic_par = d.add_paragraph()
             pic_par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            pic_par.paragraph_format.space_before = Pt(6)
-            pic_par.paragraph_format.space_after = Pt(2)
+            pf = pic_par.paragraph_format
+            pf.first_line_indent = Pt(0)
+            pf.left_indent = Pt(0)
+            pf.space_before = Pt(6)
+            pf.space_after = Pt(2)
             run = pic_par.add_run()
-            run.add_picture(f"{EMBED}/{img}", width=Inches(5.3))
-            # 题注段落
+            run.add_picture(f"{EMBED}/{img}", width=usable_w)
+            # 题注段落 (居中, 无首行缩进)
             cap_par = d.add_paragraph()
             if style_caption is not None:
                 cap_par.style = style_caption
             cap_par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            cap_par.paragraph_format.space_after = Pt(10)
+            cpf = cap_par.paragraph_format
+            cpf.first_line_indent = Pt(0)
+            cpf.left_indent = Pt(0)
+            cpf.space_after = Pt(10)
             r1 = cap_par.add_run(tag)
             set_caption_font(r1, bold=True)
             r2 = cap_par.add_run(title)
